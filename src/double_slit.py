@@ -19,7 +19,7 @@ information you could extract from your data (or you used the wrong fitting
 function).
 If you want to change the file name, that's the next line below this comment.
 """
-filename="good_single_slit.txt"
+filename="../data/good_double_slit.txt"
 """
 Change this if your filename is different.
 Note: you might need to type in the entire path to your file, in which case
@@ -30,9 +30,9 @@ import scipy.optimize as optimize
 import numpy as np
 import matplotlib.pyplot as plt
 from pylab import loadtxt
-def damped_sinusoid(t, a, b,c):
+def double_slit(t, a, b, c, d, e, f):
     #return a*np.sinc(tau*t+phi)**2 + T
-    return a*(np.sinc(b*t+c)**2)
+    return a*((np.cos(b*t+c))**2)*np.sinc(e*t+f)**2+d
 def exponential(t, a, tau):
     return a*np.exp(-t/tau)
 def linear(t, m, b):
@@ -50,7 +50,7 @@ highlighted by comments that look like:
 ########### HERE!!! ##############
 """
 def main():
-    my_func = damped_sinusoid
+    my_func = double_slit
     # Change to whichever of the 5 functions you want to fit
     plt.rcParams.update({'font.size': 14})
     plt.rcParams['figure.figsize'] = 10, 9
@@ -61,16 +61,17 @@ def main():
     # the data points are line by line instead of line 2 being all x values
     # and line 3 being all the y values, etc.
 
-    xdata = data[0]-0.064
+    xdata = data[0] 
     ydata = data[1]
     xerror = data[2]
     yerror = data[3]
-    
+ 
     # Finished importing data, naming it sensibly.
 ########### HERE!!! ##############
 
     #1. init_guess = (0.3, 1000, -0.07, 0)
-    init_guess = (0.3, 300, 0)
+    init_guess = (4, 540, 2, 0, 1.1, -0.08)
+    #init_guess = (1.47, 570, -0.86, 0, 99, -0.067)
     # single_slit init_guess = (0.35, 84, -5.46, 0)
     # Your initial guess of (a, tau, T, phi)
     # For sinusoidal functions, guessing T correctly is critically important
@@ -84,15 +85,19 @@ p0=init_guess)
     a=popt[0]
     b=popt[1]
     c=popt[2]
-    #d=popt[3]
+    d=popt[3]
+    e=popt[4]
+    f=popt[5]
     # best fit values are named nicely
     u_a=pcov[0,0]**(0.5)
     u_b=pcov[1,1]**(0.5)
     u_c=pcov[2,2]**(0.5)
-    #u_d=pcov[3,3]**(0.5)
+    u_d=pcov[3,3]**(0.5)
+    u_e=pcov[4,4]**(0.5)
+    u_f=pcov[5,5]**(0.5)
     # uncertainties of fit are named nicely
 
-    start = min(xdata)
+    start = 0
     stop = max(xdata)
     xs = np.arange(start,stop,(stop-start)/1000)
     curve = my_func(xs, *popt)
@@ -118,7 +123,7 @@ color="black", markersize=0.001)
     ax1.set_xlabel("xdata")
     ax1.set_ylabel("ydata")
     ax1.set_title("Best fit of some data points")
-    ax1.set_xlim([-0.06, 0.06])
+    ax1.set_xlim([0, 0.12])
 
     # Here is where you change how your graph is labelled.
     #ax1.set_xscale('log')
@@ -129,7 +134,10 @@ color="black", markersize=0.001)
     print("A:", a, "+/-", u_a)
     print("b:", b, "+/-", u_b)
     print("c:", c, "+/-", u_c)
-    #print("d:", d, "+/-", u_d)
+    print("d:", d, "+/-", u_d)
+    print("e:", e, "+/-", u_e)
+    print("f:", f, "+/-", u_f)
+
     # prints the various values with uncertainties
     # This is printed to your screen, not on the graph.
     # If you want to print it on the graph, use plt.text(), details at
@@ -145,7 +153,7 @@ color="black", markersize=0.001)
     ax2.set_xlabel("xdata")
     ax2.set_ylabel("ydata")
     ax2.set_title("Residuals of the fit")
-    ax2.set_xlim([-0.06, 0.06])
+    ax2.set_xlim([0, 0.12])
 
     # Here is where you change how your graph is labelled.
     fig.tight_layout()
